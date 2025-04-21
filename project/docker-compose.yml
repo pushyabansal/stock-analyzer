@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: stock_index_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - DB_PATH=/app/data/stock_index.ddb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATA_ACQUISITION_DAYS=30
+    depends_on:
+      - redis
+    networks:
+      - stock_index_network
+
+  redis:
+    image: redis:6-alpine
+    container_name: stock_index_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - stock_index_network
+
+networks:
+  stock_index_network:
+    driver: bridge
+
+volumes:
+  redis_data: 
